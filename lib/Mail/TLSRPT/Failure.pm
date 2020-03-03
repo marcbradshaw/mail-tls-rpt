@@ -30,14 +30,14 @@ sub new_from_data($class,$data) {
 
 sub as_string($self) {
     return join( "\n",
-        '  Failure:',
-        '   Result-Type: '.$self->result_type,
-        '   Sending-MTA-IP: '.$self->sending_mta_ip,
-        '   Receiving-MX-Hostname: '.$self->receiving_mx_hostname,
-        '   Receiving-MX-HELO: '.$self->receiving_mx_helo,
-        '   Failed-Session-Count: '.$self->failed_session_count,
-        '   Additional-Information: '.$self->additional_information,
-        '   Failure-Reason-Code: '.$self->failure_reason_code,
+        ' Failure:',
+        '  Result-Type: '.$self->result_type,
+        '  Sending-MTA-IP: '.$self->sending_mta_ip,
+        '  Receiving-MX-Hostname: '.$self->receiving_mx_hostname,
+        '  Receiving-MX-HELO: '.$self->receiving_mx_helo,
+        '  Failed-Session-Count: '.$self->failed_session_count,
+        '  Additional-Information: '.$self->additional_information,
+        '  Failure-Reason-Code: '.$self->failure_reason_code,
     );
 }
 
