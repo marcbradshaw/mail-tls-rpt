@@ -28,16 +28,28 @@ sub new_from_data($class,$data) {
     return $self;
 }
 
+sub as_struct($self) {
+    return {
+        'result-type' => $self->result_type,
+        $self->sending_mta_ip ? ( 'sending-mta-ip' => $self->sending_mta_ip->ip ) : (),
+        'receiving-mx-hostname' => $self->receiving_mx_hostname,
+        $self->receiving_mx_helo ? ( 'receiving-mx-helo' => $self->receiving_mx_helo ) : (),
+        'failed-session-count' => $self->failed_session_count,
+        $self->additional_information ? ( 'additional-information' => $self->additional_information ) : (),
+        $self->failure_reason_code ? ( 'failure-reason-code' => $self->failure_reason_code ) : (),
+    };
+}
+
 sub as_string($self) {
     return join( "\n",
         ' Failure:',
         '  Result-Type: '.$self->result_type,
         $self->sending_mta_ip ? ('  Sending-MTA-IP: '.$self->sending_mta_ip->ip) : (),
         '  Receiving-MX-Hostname: '.$self->receiving_mx_hostname,
-        '  Receiving-MX-HELO: '.$self->receiving_mx_helo,
+        $self->receiving_mx_helo ? ('  Receiving-MX-HELO: '.$self->receiving_mx_helo) : (),
         '  Failed-Session-Count: '.$self->failed_session_count,
         $self->additional_information ? ('  Additional-Information: '.$self->additional_information ) : (),
-        '  Failure-Reason-Code: '.$self->failure_reason_code,
+        $self->failure_reason_code ? ('  Failure-Reason-Code: '.$self->failure_reason_code ) : (),
     );
 }
 

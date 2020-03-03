@@ -37,11 +37,29 @@ sub new_from_data($class,$data) {
     return $self;
 }
 
+sub as_json($self) {
+    my $j = JSON->new;
+    return $j->encode( $self->as_struct );
+}
+
+sub as_struct($self) {
+    return {
+        'organization_name' => $self->organization_name,
+        'date-range' => {
+            'start-datetime' => $self->start_datetime->datetime.'Z',
+            'end-datetime' => $self->end_datetime->datetime.'Z',
+        },
+        'contact-info' => $self->contact_info,
+        'report-id' => $self->report_id,
+        $self->policies ? ( policies => map { $_->as_struct } $self->policies->@* ) : (),
+    };
+}
+
 sub as_string($self) {
     return join( "\n",
         'Report-ID: <'.$self->report_id.'>',
         'From: "'.$self->organization_name.'" <'.$self->contact_info.'>',
-        'Dates: '.$self->start_datetime->datetime.' to '.$self->end_datetime->datetime,
+        'Dates: '.$self->start_datetime->datetime.'Z to '.$self->end_datetime->datetime.'Z',
         map { $_->as_string } $self->policies->@*,
     );
 }
