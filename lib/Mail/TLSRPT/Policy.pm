@@ -4,17 +4,15 @@ package Mail::TLSRPT::Policy;
 use 5.20.0;
 use Moo;
 use Carp;
-use Types::Standard qw{Str Int HashRef ArrayRef};
-use Type::Utils qw{class_type};
 use Mail::TLSRPT::Pragmas;
 use Mail::TLSRPT::Failure;
-    has policy_type => (is => 'rw', isa => Str);
-    has policy_string => (is => 'rw', isa => ArrayRef);
-    has policy_domain => (is => 'rw', isa => Str);
-    has policy_mx_host => (is => 'rw', isa => Str);
-    has total_successful_session_count => (is => 'rw', isa => Int);
-    has total_failure_session_count => (is => 'rw', isa => Int);
-    has failures => (is => 'rw', isa => ArrayRef);
+    has policy_type => (is => 'rw', isa => Enum[qw( tlsa sts no-policy-found )], required => 1);
+    has policy_string => (is => 'rw', isa => ArrayRef, required => 1);
+    has policy_domain => (is => 'rw', isa => Str, required => 1);
+    has policy_mx_host => (is => 'rw', isa => Str, required => 1);
+    has total_successful_session_count => (is => 'rw', isa => Int, required => 1);
+    has total_failure_session_count => (is => 'rw', isa => Int, required => 1);
+    has failures => (is => 'rw', isa => ArrayRef, required => 0);
 
 sub new_from_data($class,$data) {
     my @failures;
@@ -22,9 +20,9 @@ sub new_from_data($class,$data) {
         push @failures, Mail::TLSRPT::Failure->new_from_data($failure);
     }
     my $self = $class->new(
-        policy_type => $data->{policy}->{'policy-type'} // '',
+        policy_type => $data->{policy}->{'policy-type'},
         policy_string => $data->{policy}->{'policy-string'} // [],
-        policy_domain => $data->{policy}->{'policy-domain'} // '',
+        policy_domain => $data->{policy}->{'policy-domain'},
         policy_mx_host => $data->{policy}->{'mx-host'} // '',
         total_successful_session_count => $data->{summary}->{'total-successful-session-count'} // 0,
         total_failure_session_count => $data->{summary}->{'total-failure-session-count'} // 0,

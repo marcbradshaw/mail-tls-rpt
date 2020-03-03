@@ -4,18 +4,16 @@ package Mail::TLSRPT::Report;
 use 5.20.0;
 use Moo;
 use Carp;
-use Types::Standard qw{Str HashRef ArrayRef};
-use Type::Utils qw{class_type};
 use Mail::TLSRPT::Pragmas;
 use Mail::TLSRPT::Policy;
 use DateTime;
 use Date::Parse qw{ str2time };
-    has organization_name => (is => 'rw', isa => Str);
-    has start_datetime => (is => 'rw', isa => class_type('DateTime'));
-    has end_datetime => (is => 'rw', isa => class_type('DateTime'));
-    has contact_info => (is => 'rw', isa => Str);
-    has report_id => (is => 'rw', isa => Str);
-    has policies => (is => 'rw', isa => ArrayRef);
+    has organization_name => (is => 'rw', isa => Str, required => 1);
+    has start_datetime => (is => 'rw', isa => class_type('DateTime'), required => 1);
+    has end_datetime => (is => 'rw', isa => class_type('DateTime'), required => 1);
+    has contact_info => (is => 'rw', isa => Str, required => 1);
+    has report_id => (is => 'rw', isa => Str, required => 1);
+    has policies => (is => 'rw', isa => ArrayRef, required => 0);
 
 sub new_from_json($class,$json) {
     my $j = JSON->new;
@@ -29,11 +27,11 @@ sub new_from_data($class,$data) {
         push @policies, Mail::TLSRPT::Policy->new_from_data($policy);
     }
     my $self = $class->new(
-        organization_name => $data->{'organization-name'} // '',
+        organization_name => $data->{'organization-name'},
         start_datetime => DateTime->from_epoch(epoch => str2time($data->{'date-range'}->{'start-datetime'})),
         end_datetime => DateTime->from_epoch(epoch => str2time($data->{'date-range'}->{'end-datetime'})),
-        contact_info => $data->{'contact-info'} // '',
-        report_id => $data->{'report-id'} // '',
+        contact_info => $data->{'contact-info'},
+        report_id => $data->{'report-id'},
         policies => \@policies,
     );
     return $self;
