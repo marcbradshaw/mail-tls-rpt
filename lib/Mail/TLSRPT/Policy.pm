@@ -23,7 +23,7 @@ sub new_from_data($class,$data) {
     }
     my $self = $class->new(
         policy_type => $data->{policy}->{'policy-type'} // '',
-        policy_string => $data->{policy}->{'policy-string'} // '',
+        policy_string => $data->{policy}->{'policy-string'} // [],
         policy_domain => $data->{policy}->{'policy-domain'} // '',
         policy_mx_host => $data->{policy}->{'mx-host'} // '',
         total_successful_session_count => $data->{summary}->{'total-successful-session-count'} // 0,
