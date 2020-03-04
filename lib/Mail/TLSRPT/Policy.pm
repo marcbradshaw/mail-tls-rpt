@@ -12,7 +12,7 @@ use Mail::TLSRPT::Failure;
     has policy_mx_host => (is => 'rw', isa => Str, required => 1);
     has total_successful_session_count => (is => 'rw', isa => Int, required => 1);
     has total_failure_session_count => (is => 'rw', isa => Int, required => 1);
-    has failures => (is => 'rw', isa => ArrayRef, required => 0);
+    has failures => (is => 'rw', isa => ArrayRef, required => 0, lazy => 1, builder => sub{return []} );
 
 sub new_from_data($class,$data) {
     my @failures;
@@ -41,7 +41,7 @@ sub as_struct($self) {
             'total-successful-session-count' => $self->total_successful_session_count,
             'total-failure-session-count' => $self->total_failure_session_count,
         },
-        $self->failures ? ( failures => map { $_->as_struct } $self->failures->@* ) : (),
+        scalar $self->failures->@* ? ( failures => map { $_->as_struct } $self->failures->@* ) : (),
     };
 }
 

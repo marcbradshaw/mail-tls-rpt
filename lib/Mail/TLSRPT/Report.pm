@@ -13,7 +13,7 @@ use Date::Parse qw{ str2time };
     has end_datetime => (is => 'rw', isa => class_type('DateTime'), required => 1);
     has contact_info => (is => 'rw', isa => Str, required => 1);
     has report_id => (is => 'rw', isa => Str, required => 1);
-    has policies => (is => 'rw', isa => ArrayRef, required => 0);
+    has policies => (is => 'rw', isa => ArrayRef, required => 0, lazy => 1, builder => sub{return []} );
 
 sub new_from_json($class,$json) {
     my $j = JSON->new;
@@ -39,19 +39,20 @@ sub new_from_data($class,$data) {
 
 sub as_json($self) {
     my $j = JSON->new;
+    $j->canonical;
     return $j->encode( $self->as_struct );
 }
 
 sub as_struct($self) {
     return {
-        'organization_name' => $self->organization_name,
+        'organization-name' => $self->organization_name,
         'date-range' => {
             'start-datetime' => $self->start_datetime->datetime.'Z',
             'end-datetime' => $self->end_datetime->datetime.'Z',
         },
         'contact-info' => $self->contact_info,
         'report-id' => $self->report_id,
-        $self->policies ? ( policies => map { $_->as_struct } $self->policies->@* ) : (),
+        scalar $self->policies->@* ? ( policies => map { $_->as_struct } $self->policies->@* ) : (),
     };
 }
 
