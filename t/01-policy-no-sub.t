@@ -7,7 +7,7 @@ use Mail::TLSRPT::Pragmas;
 use Test::More;
 use Test::Exception;
 use Mail::TLSRPT;
-use Mail::TLSRPT::Report;
+use Mail::TLSRPT::Policy;
 use DateTime;
 use Clone qw{clone};
 

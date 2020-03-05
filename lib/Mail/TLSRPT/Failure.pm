@@ -7,18 +7,23 @@ use Carp;
 use Mail::TLSRPT::Pragmas;
 use Net::IP;
     has result_type => (is => 'rw', isa => Enum[ qw( starttls-not-supported certificate-host-mismatch certificate-expired certificate-not-trusted validation-failure tlsa-invalid dnssec-invalid dane-required sts-policy-fetch-error sts-policy-invalid sts-webpki-invalid ) ], required => 1);
-    has sending_mta_ip => (is => 'rw', isa => class_type('Net::IP'), required => 1);
+    has sending_mta_ip => (is => 'rw', isa => class_type('Net::IP'), required => 1,coerce => sub{&_coerce_ip});
     has receiving_mx_hostname => (is => 'rw', isa => Str, required => 1);
     has receiving_mx_helo => (is => 'rw', isa => Str, required => 0);
     has failed_session_count => (is => 'rw', isa => Int, required => 1);
     has additional_information => (is => 'rw', isa => Str, required => 0);
     has failure_reason_code => (is => 'rw', isa => Str, required => 0);
 
+sub _coerce_ip {
+    my $ip = shift;
+    $ip = Net::IP->new($ip) unless ref $ip eq 'Net::IP';
+    return $ip;
+}
+
 sub new_from_data($class,$data) {
-    my $ip = eval{ Net::IP->new($data->{'sending-mta-ip'}) };
     my $self = $class->new(
         result_type => $data->{'result-type'},
-        sending_mta_ip => $ip,
+        sending_mta_ip => $data->{'sending-mta-ip'},
         receiving_mx_hostname => $data->{'receiving-mx-hostname'},
         $data->{'receiving-mx-helo'} ? ( receiving_mx_helo => $data->{'receiving-mx-helo'} ) : (),
         failed_session_count => $data->{'failed-session-count'} // 0,
