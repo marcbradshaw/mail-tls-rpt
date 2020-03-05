@@ -8,7 +8,6 @@ use Test::More;
 use Test::Exception;
 use Mail::TLSRPT;
 use Mail::TLSRPT::Failure;
-use DateTime;
 use Clone qw{clone};
 use Net::IP;
 
@@ -19,6 +18,7 @@ my $args = {
   sending_mta_ip => '1.2.3.4',
   receiving_mx_hostname => 'mx.example.com',
   receiving_mx_helo => 'mx1.example.com',
+  receiving_ip => '5.6.7.8',
   failed_session_count => 10,
   additional_information => 'foo bar baz',
   failure_reason_code => 'one two three',
@@ -26,7 +26,7 @@ my $args = {
 my $wanted_string = ' Failure:
   Result-Type: starttls-not-supported
   Sending-MTA-IP: 1.2.3.4
-  Receiving-MX-Hostname: mx.example.com
+  Receiving-MX-Hostname: mx.example.com (5.6.7.8)
   Receiving-MX-HELO: mx1.example.com
   Failed-Session-Count: 10
   Additional-Information: foo bar baz
@@ -38,6 +38,7 @@ my $wanted_data = {
   'failure-reason-code' => 'one two three',
   'additional-information' => 'foo bar baz',
   'receiving-mx-helo' => 'mx1.example.com',
+  'receiving-ip' => '5.6.7.8',
   'receiving-mx-hostname' => 'mx.example.com'
 };
 
@@ -50,6 +51,7 @@ subtest 'create from new' => sub {
   is( $tlsrpt->result_type, $args->{result_type}, 'result_type returned' );
   is( $tlsrpt->sending_mta_ip->ip, $args->{sending_mta_ip}, 'sending_mta_ip returned' );
   is( $tlsrpt->receiving_mx_hostname, $args->{receiving_mx_hostname}, 'receiving_mx_hostname returned' );
+  is( $tlsrpt->receiving_ip->ip, '5.6.7.8', 'receiving_ip returned' );
   is( $tlsrpt->receiving_mx_helo, $args->{receiving_mx_helo}, 'receiving_mx_helo returned' );
   is( $tlsrpt->failed_session_count, $args->{failed_session_count}, 'failed_session_count returned' );
   is( $tlsrpt->additional_information, $args->{additional_information}, 'additional_information returned' );
@@ -71,6 +73,7 @@ subtest 'create from generated data' => sub {
   is( $tlsrpt->result_type, $args->{result_type}, 'result_type returned' );
   is( $tlsrpt->sending_mta_ip->ip, $args->{sending_mta_ip}, 'sending_mta_ip returned' );
   is( $tlsrpt->receiving_mx_hostname, $args->{receiving_mx_hostname}, 'receiving_mx_hostname returned' );
+  is( $tlsrpt->receiving_ip->ip, '5.6.7.8', 'receiving_ip returned' );
   is( $tlsrpt->receiving_mx_helo, $args->{receiving_mx_helo}, 'receiving_mx_helo returned' );
   is( $tlsrpt->failed_session_count, $args->{failed_session_count}, 'failed_session_count returned' );
   is( $tlsrpt->additional_information, $args->{additional_information}, 'additional_information returned' );
