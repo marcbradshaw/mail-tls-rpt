@@ -1,0 +1,11 @@
+#!/usr/bin/env perl
+use 5.20.0;
+use strict;
+use warnings;
+use Mail::TLSRPT::Pragmas;
+# ABSTRACT: TLSRPT report processor
+# PODNAME: tlsrpt
+# VERSION
+use Mail::TLSRPT::App;
+
+Mail::TLSRPT::App->run;
