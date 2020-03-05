@@ -44,6 +44,7 @@ sub as_json($self) {
 }
 
 sub as_struct($self) {
+    my @policies = map {$_->as_struct} $self->policies->@*;
     return {
         'organization-name' => $self->organization_name,
         'date-range' => {
@@ -52,7 +53,7 @@ sub as_struct($self) {
         },
         'contact-info' => $self->contact_info,
         'report-id' => $self->report_id,
-        scalar $self->policies->@* ? ( policies => map { $_->as_struct } $self->policies->@* ) : (),
+        scalar $self->policies->@* ? ( policies => \@policies ) : (),
     };
 }
 

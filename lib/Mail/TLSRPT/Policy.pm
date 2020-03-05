@@ -32,8 +32,9 @@ sub new_from_data($class,$data) {
 }
 
 sub as_struct($self) {
+    my @failures = map {$_->as_struct} $self->failures->@*;
     return {
-        'policy' => {
+        policy => {
             'policy-type' => $self->policy_type,
             'policy-string' => $self->policy_string,
             'policy-domain' => $self->policy_domain,
@@ -43,7 +44,7 @@ sub as_struct($self) {
             'total-successful-session-count' => $self->total_successful_session_count,
             'total-failure-session-count' => $self->total_failure_session_count,
         },
-        scalar $self->failures->@* ? ( failures => map { $_->as_struct } $self->failures->@* ) : (),
+        scalar $self->failures->@* ? ( 'failure_details' => \@failures ) : (),
     };
 }
 
