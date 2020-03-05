@@ -8,6 +8,7 @@ use Mail::TLSRPT::Pragmas;
 use Mail::TLSRPT::Policy;
 use DateTime;
 use Date::Parse qw{ str2time };
+use IO::Uncompress::Gunzip;
     has organization_name => (is => 'rw', isa => Str, required => 1);
     has start_datetime => (is => 'rw', isa => class_type('DateTime'), required => 1);
     has end_datetime => (is => 'rw', isa => class_type('DateTime'), required => 1);
@@ -19,6 +20,12 @@ sub new_from_json($class,$json) {
     my $j = JSON->new;
     my $data = $j->decode($json);
     return $class->new_from_data($data);
+}
+
+sub new_from_json_gz($class,$compressed_json) {
+  my $json;
+  IO::Uncompress::Gunzip::gunzip(\$compressed_json,\$json);
+  return $class->new_from_json($json);
 }
 
 sub new_from_data($class,$data) {
