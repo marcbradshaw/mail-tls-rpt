@@ -62,5 +62,31 @@ sub as_string($self) {
     );
 }
 
+sub _csv_headers($self) {
+    return (
+        'result type',
+        'sending mta ip',
+        'receiving mx hostname',
+        'receiving mx helo',
+        'receiving ip',
+        'failed session count',
+        'additional information',
+        'failure reason code',
+    );
+}
+
+sub _csv_fragment($self) {
+    return (
+        $self->result_type,
+        $self->sending_mta_ip->ip,
+        $self->receiving_mx_hostname,
+        $self->receiving_mx_helo // '',
+        $self->receiving_ip ? $self->receiving_ip->ip : '',
+        $self->failed_session_count,
+        $self->additional_information // '',
+        $self->failure_reason_code // '',
+    );
+}
+
 1;
 

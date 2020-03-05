@@ -6,9 +6,11 @@ use Moo;
 use Carp;
 use Mail::TLSRPT::Pragmas;
 use Mail::TLSRPT::Policy;
+use Mail::TLSRPT::Failure;
 use DateTime;
 use Date::Parse qw{ str2time };
 use IO::Uncompress::Gunzip;
+use Text::CSV;
     has organization_name => (is => 'rw', isa => Str, required => 1);
     has start_datetime => (is => 'rw', isa => class_type('DateTime'), required => 1);
     has end_datetime => (is => 'rw', isa => class_type('DateTime'), required => 1);
@@ -71,6 +73,52 @@ sub as_string($self) {
         'Dates: '.$self->start_datetime->datetime.'Z to '.$self->end_datetime->datetime.'Z',
         map { $_->as_string } $self->policies->@*,
     );
+}
+
+sub _csv_headers($self) {
+    return (
+        'report id',
+        'organization name',
+        'start date time',
+        'end date time',
+        'contact info',
+    );
+}
+
+sub _csv_fragment($self) {
+    return (
+        $self->report_id,
+        $self->organization_name,
+        $self->start_datetime,
+        $self->end_datetime,
+        $self->contact_info,
+    );
+}
+
+sub as_csv($self) {
+    my @output;
+    my $csv = Text::CSV->new;
+    $csv->combine($self->_csv_headers,Mail::TLSRPT::Policy->_csv_headers,Mail::TLSRPT::Failure->_csv_headers);
+    push @output, $csv->string;
+    if ( scalar $self->policies->@* ) {
+        foreach my $policy ( $self->policies->@* ) {
+            if ( scalar $policy->failures->@* ) {
+                foreach my $failure ( $policy->failures->@* ) {
+                    $csv->combine($self->_csv_fragment,$policy->_csv_fragment,$failure->_csv_fragment);
+                    push @output, $csv->string;
+                }
+            }
+            else {
+                $csv->combine($self->_csv_fragment,$policy->_csv_fragment);
+                push @output, $csv->string;
+            }
+        }
+    }
+    else {
+        $csv->combine($self->_csv_fragment);
+        push @output, $csv->string;
+    }
+    return join( "\n", @output );
 }
 
 1;

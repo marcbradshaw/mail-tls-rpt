@@ -61,5 +61,27 @@ sub as_string($self) {
     );
 }
 
+sub _csv_headers($self) {
+    return (
+        'policy type',
+        'policy string',
+        'policy domain',
+        'policy mx host',
+        'total successful session count',
+        'total failure session count',
+    );
+}
+
+sub _csv_fragment($self) {
+    return (
+        $self->policy_type,
+        join('; ',$self->policy_string->@*),
+        $self->policy_domain,
+        $self->policy_mx_host,
+        $self->total_successful_session_count,
+        $self->total_failure_session_count,
+    );
+}
+
 1;
 
