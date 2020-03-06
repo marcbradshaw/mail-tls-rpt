@@ -95,11 +95,13 @@ sub _csv_fragment($self) {
     );
 }
 
-sub as_csv($self) {
+sub as_csv($self,$args) {
     my @output;
     my $csv = Text::CSV->new;
-    $csv->combine($self->_csv_headers,Mail::TLSRPT::Policy->_csv_headers,Mail::TLSRPT::Failure->_csv_headers);
-    push @output, $csv->string;
+    if ( $args->{add_header} ) {
+      $csv->combine($self->_csv_headers,Mail::TLSRPT::Policy->_csv_headers,Mail::TLSRPT::Failure->_csv_headers);
+      push @output, $csv->string;
+    }
     if ( scalar $self->policies->@* ) {
         foreach my $policy ( $self->policies->@* ) {
             if ( scalar $policy->failures->@* ) {
