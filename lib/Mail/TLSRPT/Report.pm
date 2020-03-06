@@ -89,8 +89,8 @@ sub _csv_fragment($self) {
     return (
         $self->report_id,
         $self->organization_name,
-        $self->start_datetime,
-        $self->end_datetime,
+        $self->start_datetime->datetime.'Z',
+        $self->end_datetime->datetime.'Z',
         $self->contact_info,
     );
 }
