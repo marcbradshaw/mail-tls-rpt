@@ -3,7 +3,6 @@ package Mail::TLSRPT::Failure;
 # VERSION
 use 5.20.0;
 use Moo;
-use Carp;
 use Mail::TLSRPT::Pragmas;
 use Net::IP;
     has result_type => (is => 'rw', isa => Enum[ qw( starttls-not-supported certificate-host-mismatch certificate-expired certificate-not-trusted validation-failure tlsa-invalid dnssec-invalid dane-required sts-policy-fetch-error sts-policy-invalid sts-webpki-invalid ) ], required => 1);
@@ -21,6 +20,33 @@ sub _coerce_ip {
     return $ip;
 }
 
+=head1 DESCRIPTION
+
+Classes to process tlsrpt failure in a report
+
+=head1 SYNOPSIS
+
+my $failure = Mail::TLSRPT::Failure->new(
+    result_type => 'certificate-expired',
+    sending_mta_ip => Net::IP->new($ip),
+    receiving_mx_hostname => 'mx.example.com',
+    receiving_mx_helo => 'mx1.example.com',
+    receiving_ip => Net::IP->new($ip),
+    failed_session_count => 10,
+    additional_information => 'Foo',
+    failure_reason_code => 'Bar',
+);
+
+=constructor I<new($class)>
+
+Create a new object
+
+=constructor I<new_from_data($data)>
+
+Create a new object using a data structure, this will create sub-objects as required.
+
+=cut
+
 sub new_from_data($class,$data) {
     my $self = $class->new(
         result_type => $data->{'result-type'},
@@ -35,6 +61,12 @@ sub new_from_data($class,$data) {
     return $self;
 }
 
+=method I<as_struct>
+
+Return the current object as a data structure
+
+=cut
+
 sub as_struct($self) {
     return {
         'result-type' => $self->result_type,
@@ -47,6 +79,12 @@ sub as_struct($self) {
         $self->failure_reason_code ? ( 'failure-reason-code' => $self->failure_reason_code ) : (),
     };
 }
+
+=method I<as_string>
+
+Return a textual human readable representation of the current object and its sub-objects
+
+=cut
 
 sub as_string($self) {
     my $receiving_ip = $self->receiving_ip ? ' ('.$self->receiving_ip->ip.')' : '';

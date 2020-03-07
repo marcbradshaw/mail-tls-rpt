@@ -3,7 +3,6 @@ package Mail::TLSRPT::Report;
 # VERSION
 use 5.20.0;
 use Moo;
-use Carp;
 use Mail::TLSRPT::Pragmas;
 use Mail::TLSRPT::Policy;
 use Mail::TLSRPT::Failure;
@@ -12,11 +11,42 @@ use Date::Parse qw{ str2time };
 use IO::Uncompress::Gunzip;
 use Text::CSV;
     has organization_name => (is => 'rw', isa => Str, required => 1);
-    has start_datetime => (is => 'rw', isa => class_type('DateTime'), required => 1);
-    has end_datetime => (is => 'rw', isa => class_type('DateTime'), required => 1);
+    has start_datetime => (is => 'rw', isa => class_type('DateTime'), required => 1, coerce => sub{&_coerce_datetime});
+    has end_datetime => (is => 'rw', isa => class_type('DateTime'), required => 1, coerce => sub{&_coerce_datetime});
     has contact_info => (is => 'rw', isa => Str, required => 1);
     has report_id => (is => 'rw', isa => Str, required => 1);
     has policies => (is => 'rw', isa => ArrayRef, required => 0, lazy => 1, builder => sub{return []} );
+
+sub _coerce_datetime {
+    my $time = shift;
+    $time = DateTime->from_epoch( epoch=>$time ) unless ref $time eq 'DateTime';
+    return $time;
+}
+
+=head1 DESCRIPTION
+
+Classes to process tlsrpt report
+
+=head1 SYNOPSIS
+
+my $report = Mail::TLSRPT::Report->new(
+    organization_name => 'My Corp',
+    start_datetime => $date,
+    end_datetime => $enddate,
+    contact_info => 'reports@example.com',
+    report_id => '123abc',
+    policies => $policies,
+};
+
+=constructor I<new($class)>
+
+Create a new object
+
+=constructor I<new_from_json($json)>
+
+Create a new object using a JSON string, this will create sub-objects as required.
+
+=cut
 
 sub new_from_json($class,$json) {
     my $j = JSON->new;
@@ -24,11 +54,23 @@ sub new_from_json($class,$json) {
     return $class->new_from_data($data);
 }
 
+=constructor I<new_from_json_gz($json)>
+
+Create a new object using a gzipped JSON string, this will create sub-objects as required.
+
+=cut
+
 sub new_from_json_gz($class,$compressed_json) {
   my $json;
   IO::Uncompress::Gunzip::gunzip(\$compressed_json,\$json);
   return $class->new_from_json($json);
 }
+
+=constructor I<new_from_data($data)>
+
+Create a new object using a data structure, this will create sub-objects as required.
+
+=cut
 
 sub new_from_data($class,$data) {
     my @policies;
@@ -46,11 +88,23 @@ sub new_from_data($class,$data) {
     return $self;
 }
 
+=method I<as_json>
+
+Return the current object and sub-objects as a json string
+
+=cut
+
 sub as_json($self) {
     my $j = JSON->new;
     $j->canonical;
     return $j->encode( $self->as_struct );
 }
+
+=method I<as_struct>
+
+Return the current object and sub-objects as a data structure
+
+=cut
 
 sub as_struct($self) {
     my @policies = map {$_->as_struct} $self->policies->@*;
@@ -65,6 +119,12 @@ sub as_struct($self) {
         scalar $self->policies->@* ? ( policies => \@policies ) : (),
     };
 }
+
+=method I<as_string>
+
+Return a textual human readable representation of the current object and its sub-objects
+
+=cut
 
 sub as_string($self) {
     return join( "\n",
@@ -94,6 +154,14 @@ sub _csv_fragment($self) {
         $self->contact_info,
     );
 }
+
+=method I<as_csv($args)>
+
+Return a csv representation of the current object and its sub-objects
+
+If the argument add_header is true then a csv header will be included in the output.
+
+=cut
 
 sub as_csv($self,$args) {
     my @output;

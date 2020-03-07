@@ -6,6 +6,12 @@ use Mail::TLSRPT::Pragmas;
 use Mail::TLSRPT::App -command;
 use Mail::TLSRPT::Report;
 
+=head1 DESCRIPTION
+
+App::Cmd class implementing the 'tlsrpt report' command
+
+=cut
+
 sub abstract { 'Process a single tlsrpt file' }
 sub description { 'Process a single tlsrpt file and output as csv' };
 sub usage_desc { "%c process %o FILE <FILE> <FILE>" }

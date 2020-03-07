@@ -3,7 +3,6 @@ package Mail::TLSRPT::Policy;
 # VERSION
 use 5.20.0;
 use Moo;
-use Carp;
 use Mail::TLSRPT::Pragmas;
 use Mail::TLSRPT::Failure;
     has policy_type => (is => 'rw', isa => Enum[qw( tlsa sts no-policy-found )], required => 1);
@@ -13,6 +12,32 @@ use Mail::TLSRPT::Failure;
     has total_successful_session_count => (is => 'rw', isa => Int, required => 1);
     has total_failure_session_count => (is => 'rw', isa => Int, required => 1);
     has failures => (is => 'rw', isa => ArrayRef, required => 0, lazy => 1, builder => sub{return []} );
+
+=head1 DESCRIPTION
+
+Classes to process tlsrpt policy in a report
+
+=head1 SYNOPSIS
+
+my $policy = Mail::TLSRPT::Policy->new(
+    policy_type => 'no-policy-found',
+    policy_string => [],
+    policy_domain => 'example.com',
+    polixy_mx_host => 'mx.example.com',
+    total_succerssful_session_count => 10,
+    total_failure_session_count => 2,
+    failures => $failures,
+);
+
+=constructor I<new($class)>
+
+Create a new object
+
+=constructor I<new_from_data($data)>
+
+Create a new object using a data structure, this will create sub-objects as required.
+
+=cut
 
 sub new_from_data($class,$data) {
     my @failures;
@@ -31,6 +56,12 @@ sub new_from_data($class,$data) {
     return $self;
 }
 
+=method I<as_struct>
+
+Return the current object and sub-objects as a data structure
+
+=cut
+
 sub as_struct($self) {
     my @failures = map {$_->as_struct} $self->failures->@*;
     return {
@@ -47,6 +78,12 @@ sub as_struct($self) {
         scalar $self->failures->@* ? ( 'failure_details' => \@failures ) : (),
     };
 }
+
+=method I<as_string>
+
+Return a textual human readable representation of the current object and its sub-objects
+
+=cut
 
 sub as_string($self) {
     return join( "\n",
