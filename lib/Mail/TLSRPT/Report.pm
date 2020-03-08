@@ -135,6 +135,10 @@ sub as_string($self) {
     );
 }
 
+sub _register_prometheus($self,$prometheus) {
+    $prometheus->declare('tlsrpt_reports_processed_total', help=>'TLSRPT reports processed', type=>'counter' );
+}
+
 =method I<process_prometheus($prometheus)>
 
 Generate metrics using the given Prometheus::Tiny object
@@ -142,8 +146,13 @@ Generate metrics using the given Prometheus::Tiny object
 =cut
 
 sub process_prometheus($self,$prometheus) {
-    $prometheus->declare('tlsrpt_reports_processed_total', help=>'TLSRPT reports processed', type=>'counter' );
-    $prometheus->add('tlsrpt_reports_processed_total',1,{organization_name=>$self->organization_name,policies=>scalar $self->policies->@*});
+    $self->_register_prometheus($prometheus);
+    $prometheus->add('tlsrpt_reports_processed_total',1,{
+        organization_name=>$self->organization_name,
+        policies=>scalar $self->policies->@*,
+    });
+    Mail::TLSRPT::Policy->_register_prometheus($prometheus) if ! scalar $self->policies->@*;
+    Mail::TLSRPT::Failure->_register_prometheus($prometheus) if ! scalar $self->policies->@*;
     foreach my $policy ( $self->policies->@* ) {
         $policy->process_prometheus($self,$prometheus);
     }
