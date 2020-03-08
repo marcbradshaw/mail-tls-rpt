@@ -100,6 +100,11 @@ sub as_string($self) {
     );
 }
 
+sub process_prometheus($self,$policy,$report,$prometheus) {
+    $prometheus->declare('tlsrpt_failures_total', help=>'TLSRPT failures', type=>'counter' );
+    $prometheus->add('tlsrpt_failures_total',$self->failed_session_count,{organization_name=>$report->organization_name, policy_type=>$policy->policy_type, policy_domain=>$policy->policy_domain, policy_mx_host=>$policy->policy_mx_host, result_type=>$self->result_type, sending_mta_ip=>$self->sending_mta_ip, receiving_mx_hostname=>$self->receiving_mx_hostname, receiving_mx_helo=>$self->receiving_mx_helo, receiving_ip=>($self->receiving_ip?$self->receiving_ip->ip:'')});
+}
+
 sub _csv_headers($self) {
     return (
         'result type',

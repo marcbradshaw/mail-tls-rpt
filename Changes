@@ -1,4 +1,7 @@
 {{$NEXT}}
+  - Methods to generate prometheus metrics
+  - Add/improve POD
+  - Allow coersion of DateTime
 
 1.20200306.1 2020-03-06 UTC
   - Add comment to process report files and output csv

@@ -135,6 +135,20 @@ sub as_string($self) {
     );
 }
 
+=method I<process_prometheus($prometheus)>
+
+Generate metrics using the given Prometheus::Tiny object
+
+=cut
+
+sub process_prometheus($self,$prometheus) {
+    $prometheus->declare('tlsrpt_reports_processed_total', help=>'TLSRPT reports processed', type=>'counter' );
+    $prometheus->add('tlsrpt_reports_processed_total',1,{organization_name=>$self->organization_name,policies=>scalar $self->policies->@*});
+    foreach my $policy ( $self->policies->@* ) {
+        $policy->process_prometheus($self,$prometheus);
+    }
+}
+
 sub _csv_headers($self) {
     return (
         'report id',

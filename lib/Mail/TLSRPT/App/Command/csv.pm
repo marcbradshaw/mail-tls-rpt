@@ -1,5 +1,5 @@
-package Mail::TLSRPT::App::Command::process;
-# ABSTRACT: Process a single tlsrpt file
+package Mail::TLSRPT::App::Command::csv;
+# ABSTRACT: Process tlsrpt reports into csv
 # VERSION
 use 5.20.0;
 use Mail::TLSRPT::Pragmas;
@@ -8,24 +8,21 @@ use Mail::TLSRPT::Report;
 
 =head1 DESCRIPTION
 
-App::Cmd class implementing the 'tlsrpt report' command
+App::Cmd class implementing the 'tlsrpt csv' command
 
 =cut
 
-sub abstract { 'Process a single tlsrpt file' }
-sub description { 'Process a single tlsrpt file and output as csv' };
-sub usage_desc { "%c process %o FILE <FILE> <FILE>" }
+sub abstract { 'Process tlsrpt files into csv' }
+sub description { 'Process tlsrpt files and output as csv' };
+sub usage_desc { "%c csv %o FILE <FILE> <FILE>" }
 
 sub opt_spec {
   return (
-    [ 'format=s', 'Output format (csv)' ],
     [ 'output=s', 'Write results to filename (defaults to STDOUT)' ],
   );
 }
 
 sub validate_args($self,$opt,$args) {
-  $self->usage_error('Must supply a format') if ( !$opt->format );
-  $self->usage_error('Unknown format') if (!( $opt->format eq 'csv' ));
   $self->usage_error('No files specified') if !@$args;
 }
 
@@ -49,7 +46,7 @@ sub execute($self,$opt,$args) {
     $tlsrpt //= eval{ Mail::TLSRPT::Report->new_from_json_gz($payload) };
     $self->usage_error('Could not parse file') if !$tlsrpt;
 
-    push @all_output, $tlsrpt->as_csv({add_header=>$add_header}) if $opt->format eq 'csv';
+    push @all_output, $tlsrpt->as_csv({add_header=>$add_header});
     $add_header = 0;
 
   }

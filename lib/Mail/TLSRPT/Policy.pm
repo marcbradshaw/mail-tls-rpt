@@ -98,6 +98,21 @@ sub as_string($self) {
     );
 }
 
+=method I<process_prometheus($prometheus,$report)>
+
+Generate metrics using the given Prometheus::Tiny object
+
+=cut
+
+sub process_prometheus($self,$report,$prometheus) {
+    $prometheus->declare('tlsrpt_sessions_total', help=>'TLSRPT tls sessions', type=>'counter' );
+    $prometheus->add('tlsrpt_sessions_total',$self->total_successful_session_count,{result=>'successful', organization_name=>$report->organization_name, policy_type=>$self->policy_type, policy_domain=>$self->policy_domain, policy_mx_host=>$self->policy_mx_host});
+    $prometheus->add('tlsrpt_sessions_total',$self->total_failure_session_count,{result=>'failure', organization_name=>$report->organization_name, policy_type=>$self->policy_type, policy_domain=>$self->policy_domain, policy_mx_host=>$self->policy_mx_host});
+    foreach my $failure ( $self->failures->@* ) {
+        $failure->process_prometheus($self,$report,$prometheus);
+    }
+}
+
 sub _csv_headers($self) {
     return (
         'policy type',
