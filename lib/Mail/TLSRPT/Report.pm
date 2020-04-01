@@ -46,9 +46,14 @@ Create a new object
 
 Create a new object using a JSON string, this will create sub-objects as required.
 
+Will detect and handle a gzipped string.
+
 =cut
 
 sub new_from_json($class,$json) {
+    if ( $json =~ /^\037\213/ ) {
+        return $class->new_from_json_gz($json);
+    }
     my $j = JSON->new;
     my $data = $j->decode($json);
     return $class->new_from_data($data);

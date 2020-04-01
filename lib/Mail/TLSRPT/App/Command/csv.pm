@@ -42,12 +42,16 @@ sub execute($self,$opt,$args) {
     close $fh;
     my $payload = join('',@file_contents);
 
-    $tlsrpt = eval{ Mail::TLSRPT::Report->new_from_json($payload) };
-    $tlsrpt //= eval{ Mail::TLSRPT::Report->new_from_json_gz($payload) };
-    $self->usage_error('Could not parse file') if !$tlsrpt;
+    my $tlsrpt = eval{ Mail::TLSRPT::Report->new_from_json($payload) };
+    my $error = $@;
 
-    push @all_output, $tlsrpt->as_csv({add_header=>$add_header});
-    $add_header = 0;
+    if ( $tlsrpt ) {
+        push @all_output, $tlsrpt->as_csv({add_header=>$add_header});
+        $add_header = 0;
+    }
+    else {
+        warn "Could not parse file $file: $error";
+    }
 
   }
 
