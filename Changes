@@ -1,4 +1,5 @@
 {{$NEXT}}
+  - Switch to a purely numeric version string
 
 1.20200413.1 2020-04-13 UTC
   - Methods to generate prometheus metrics
